@@ -1,3 +1,4 @@
+const { assert } = require('chai');
 const { default: Web3 } = require('web3');
 
 const EthSwap = artifacts.require("EthSwap");
@@ -9,12 +10,12 @@ function tokens(n){
     return web3.utils.toWei(n, 'ether');
 }
 
-contract('EthSwap', (accounts) => {
+contract('EthSwap', ([deployer, investor]) => {
     let token, ethSwap;
 
     before(async () => {
         token = await Token.new()
-        ethSwap = await EthSwap.new()
+        ethSwap = await EthSwap.new(token.address)
 
         //Transfer 1M
         await token.transfer(ethSwap.address, tokens('1000000'))
@@ -36,6 +37,27 @@ contract('EthSwap', (accounts) => {
         it('contract has a tokens', async() => {
             let balance = await token.balanceOf(ethSwap.address)
             assert.equal(balance.toString(), tokens('1000000'))
+        })
+    })
+
+    describe('Buy Tokens', async() => {
+        let result;
+        before(async () => {
+            result = await ethSwap.buyTokens({ from: investor, value: web3.utils.toWei('1', 'Ether') })
+        })
+        it('Buy Tokens instantly for a fixed price', async() => {
+            //check investor balance before purchase
+            let investorBalance = await token.balanceOf(investor);
+            assert.equal(investorBalance.toString(), tokens('100'))
+
+            //Get ethSwap balance after purchase
+            let ethSwapBalance;
+            ethSwapBalance = await token.balanceOf(ethSwap.address);
+            assert.equal(ethSwapBalance.toString(), tokens('999900'))
+
+            ethSwapBalance = await web3.eth.getBalance(ethSwap.address)
+
+            assert.equal(ethSwapBalance.toString(), web3.utils.toWei('1', 'Ether'))
         })
     })
 });
