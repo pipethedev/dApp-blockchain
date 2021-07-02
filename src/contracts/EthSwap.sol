@@ -16,6 +16,13 @@ contract EthSwap {
         uint rate
     );
 
+    event TokenSold(
+        address account,
+        address token,
+        uint amount,
+        uint rate
+    );
+
     constructor(Token _token) public {
         token = _token;
     }
@@ -41,5 +48,8 @@ contract EthSwap {
         //Perform the sale
         token.transferFrom(msg.sender, address(this), _amount);
         msg.sender.transfer(etherAmount);
+
+        //Emit sold event
+        emit TokenSold(msg.sender, address(token), _amount, rate);
     }
 }
