@@ -1,6 +1,6 @@
 {
-  "short_name": "Starter Kit",
-  "name": "Dapp University Starter Kit",
+  "short_name": "EthSwap",
+  "name": "A simple ethereum based currency exchange platform",
   "icons": [
     {
       "src": "favicon.ico",
